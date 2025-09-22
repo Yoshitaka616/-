@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>記事作成アプリ</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Hiragino Sans', 'Yu Gothic UI', 'Meiryo UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(45deg, #4facfe 0%, #00f2fe 100%);
+            padding: 40px 20px;
+            text-align: center;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            padding: 40px;
+        }
+
+        .input-section {
+            margin-bottom: 30px;
+        }
+
+        .input-label {
+            display: block;
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+            font-size: 1rem;
+            resize: vertical;
+            min-height: 120px;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: #4facfe;
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .generate-btn {
+            width: 100%;
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            border: none;
+            padding: 18px 30px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .generate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+        }
+
+        .generate-btn:active {
+            transform: translateY(0);
+        }
+
+        .generate-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .result-section {
+            margin-top: 40px;
+        }
+
+        .result-label {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .result-area {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 25px;
+            min-height: 300px;
+            white-space: pre-wrap;
+            line-height: 1.8;
+            font-size: 1rem;
+            color: #495057;
+            transition: all 0.3s ease;
+        }
+
+        .result-area.has-content {
+            background: white;
+            border-color: #4facfe;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            color: #4facfe;
+            font-style: italic;
+        }
+
+        .loading::after {
+            content: '...';
+            animation: dots 2s infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% { content: '...'; }
+            40% { content: '....'; }
+            60% { content: '.....'; }
+            80%, 100% { content: '......'; }
+        }
+
+        .error {
+            color: #dc3545;
+            background: #f8d7da;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            border: 1px solid #f5c6cb;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .main-content {
+                padding: 20px;
+            }
+            
+            .container {
+                margin: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>✨ 記事作成AI</h1>
+            <p>あなたのアイデアを魅力的な記事に変換します</p>
+        </div>
+        
+        <div class="main-content">
+            <div class="input-section">
+                <label for="input-text" class="input-label">記事のテーマやキーワードを入力してください</label>
+                <textarea 
+                    id="input-text" 
+                    class="input-field" 
+                    placeholder="例：AIの活用方法について、健康的な食生活のコツ、リモートワークの効率化など..."
+                ></textarea>
+            </div>
+            
+            <button id="generate-btn" class="generate-btn">
+                記事を生成する
+            </button>
+            
+            <div class="result-section">
+                <div class="result-label">
+                    📝 生成された記事
+                </div>
+                <div id="result-area" class="result-area">
+                    ここに生成された記事が表示されます...
+                </div>
+                <div id="loading" class="loading">
+                    記事を生成中です
+                </div>
+                <div id="error-message" class="error" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const inputText = document.getElementById('input-text');
+        const generateBtn = document.getElementById('generate-btn');
+        const resultArea = document.getElementById('result-area');
+        const loading = document.getElementById('loading');
+        const errorMessage = document.getElementById('error-message');
+
+        generateBtn.addEventListener('click', async () => {
+            const input = inputText.value.trim();
+            
+            if (!input) {
+                showError('テーマやキーワードを入力してください。');
+                return;
+            }
+
+            // UI状態を生成中に変更
+            generateBtn.disabled = true;
+            generateBtn.textContent = '生成中...';
+            loading.style.display = 'block';
+            resultArea.textContent = '';
+            resultArea.classList.remove('has-content');
+            errorMessage.style.display = 'none';
+
+            try {
+                // あなたのAPIエンドポイントに合わせて変更してください
+                const response = await fetch('/api/generate-article', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        prompt: input
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                // 生成された記事を表示
+                resultArea.textContent = data.article || data.content || data.text || '記事が生成されました';
+                resultArea.classList.add('has-content');
+                
+            } catch (error) {
+                console.error('Error:', error);
+                showError('記事の生成中にエラーが発生しました。もう一度お試しください。');
+            } finally {
+                // UI状態をリセット
+                generateBtn.disabled = false;
+                generateBtn.textContent = '記事を生成する';
+                loading.style.display = 'none';
+            }
+        });
+
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+        }
+
+        // エンターキーでの送信（Ctrl+Enterで改行）
+        inputText.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.ctrlKey && !e.shiftKey) {
+                e.preventDefault();
+                generateBtn.click();
+            }
+        });
+    </script>
+</body>
+</html>
